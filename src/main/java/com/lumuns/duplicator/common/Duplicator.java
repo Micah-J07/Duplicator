@@ -21,7 +21,7 @@ public class Duplicator {
 
     public static Logger logger;
 
-    @SidedProxy(clientSide="com.lumuns.duplicator.proxy.ClientProxy", serverSide = "com.lumuns.duplicator.proxy.ServerProxy")
+    @SidedProxy(clientSide="com.lumuns.duplicator.common.proxy.ClientProxy", serverSide = "com.lumuns.duplicator.common.proxy.ServerProxy")
     private static IProxy proxy;
 
     @Mod.EventHandler
