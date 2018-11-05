@@ -1,5 +1,6 @@
 package com.lumuns.duplicator.common;
 
+import com.lumuns.duplicator.common.blocks.BlockDuplicator;
 import com.lumuns.duplicator.common.proxy.IProxy;
 import com.lumuns.duplicator.common.utils.Ref;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,8 @@ import org.apache.logging.log4j.Logger;
 public class Duplicator {
 
     public static Minecraft mc = Minecraft.getMinecraft();
+
+    public static BlockDuplicator blockDuplicator;
 
     @Mod.Instance(Ref.MODID)
     public static Duplicator instance;

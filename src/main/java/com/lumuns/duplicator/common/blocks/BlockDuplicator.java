@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -20,12 +21,19 @@ public class BlockDuplicator extends BlockContainer {
     BlockDuplicator() {
         super(Material.ROCK);
 
-        this.setCreativeTab(CreativeTabs.INVENTORY);
+        this.setCreativeTab(CreativeTabs.MISC);
         this.setResistance(0.1f);
         this.setHardness(0.1f);
         this.setRegistryName(Ref.MODID, "duplicator");
-        this.setUnlocalizedName(Ref.MODID +"_"+"duplicator");
+        this.setUnlocalizedName(Ref.MODID +"."+"duplicator");
     }
+
+    @Override
+    public EnumBlockRenderType getRenderType(IBlockState state)
+    {
+        return EnumBlockRenderType.MODEL;
+    }
+
 
     @Nullable
     @Override
