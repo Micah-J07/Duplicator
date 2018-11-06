@@ -5,16 +5,26 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
-public class TileEntityDuplicator extends TileEntity implements IInventory, ISidedInventory {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public class TileEntityDuplicator extends TileEntity implements IInventory, ISidedInventory, ITickable {
     public void activated(World world, BlockPos pos, EntityPlayer player) {
         player.openGui(Duplicator.instance, 3, world, pos.getX(), pos.getY(), pos.getZ());
     }
+
+
 
     @Override
     public int[] getSlotsForFace(EnumFacing side) {
@@ -96,4 +106,62 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
     @Override
     public boolean hasCustomName() { return false; }
+
+    private ItemStackHandler itemStackHandler = new ItemStackHandler(1) {
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            // We need to tell the tile entity that something has changed so
+            // that the chest contents is persisted
+            TileEntityDuplicator.this.markDirty();
+        }
+
+        @Override
+        public int getSlotLimit(int slot)
+        {
+            return 1;
+        }
+
+        @Override
+        @Nonnull
+        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            return super.insertItem(slot, stack, simulate);
+        }
+    };
+
+    @Override
+    public void readFromNBT(NBTTagCompound compound) {
+        super.readFromNBT(compound);
+        if (compound.hasKey("items")) {
+            itemStackHandler.deserializeNBT((NBTTagCompound) compound.getTag("items"));
+        }
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        super.writeToNBT(compound);
+        compound.setTag("items", itemStackHandler.serializeNBT());
+        return compound;
+    }
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return true;
+        }
+        return super.hasCapability(capability, facing);
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
+        }
+        return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public void update() {
+
+    }
 }
