@@ -16,6 +16,8 @@ Yeah, of course I did! if I wanted it then I'm sure at least one other person wa
 ### Features
 - Insertable, Extractable block that allows for one input and one output. Item goes in, stacks come out.
 - In hand item version of the duplicator block.
+- OP as hell
+- Ruins servers & balence - and thats a guaranteed!
 
 ### Specs
 - Minecraft: `1.12.2`
