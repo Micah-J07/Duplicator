@@ -1,0 +1,35 @@
+{
+  "result": {
+    "item": "duplicator:duplicator"
+  },
+  "pattern": [
+    "trt",
+    "lae",
+    "ici"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "t": {
+      "item": "minecraft:nether_star"
+    },
+    "i": {
+      "item": "minecraft:diamond_block"
+    },
+    "r": {
+      "item": "minecraft:gold_block"
+    },
+    "l": {
+      "item": "minecraft:iron_block",
+      "data": 4
+    },
+    "e": {
+      "item": "minecraft:beacon"
+    },
+    "a": {
+      "item": "minecraft:dragon_breath"
+    },
+    "c": {
+      "item": "minecraft:emerald_block"
+    }
+  }
+}
