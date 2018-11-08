@@ -1,7 +1,7 @@
 package com.lumuns.duplicator.common.tileentity;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.ItemStackHelper;
@@ -9,7 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.ITextComponent;
@@ -22,12 +21,10 @@ import net.minecraftforge.items.ItemStackHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TileEntityDuplicator extends TileEntity implements IInventory, ISidedInventory, ITickable {
+public class TileEntityDuplicator extends TileEntity implements IInventory, ISidedInventory {
 
     private NonNullList<ItemStack> inventory = NonNullList.<ItemStack>withSize(2, ItemStack.EMPTY);
     private String blockName;
-
-    private boolean reject = false;
 
     @Override
     public int[] getSlotsForFace(EnumFacing side) {
@@ -62,7 +59,11 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
     @Override
     public ItemStack decrStackSize(int index, int count) {
-        System.out.println(index);
+        if( index == 0 ) {
+            if( this.inventory.get(0).getCount() - count == 0 && !this.inventory.get(1).isEmpty() )
+                this.inventory.set(1, ItemStack.EMPTY);
+        }
+
         if( index == 1 ) {
             ItemStack stack = ItemStackHelper.getAndSplit(this.inventory, index, count);
             ItemStack dupStack = this.inventory.get(0);
@@ -205,30 +206,5 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
             return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
         }
         return super.getCapability(capability, facing);
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        return super.getUpdateTag();
-    }
-
-    @Override
-    public void update() {
-//        if( world == null || !world.isRemote || reject )
-//            return;
-//
-//        ItemStack stack = this.inventory.get(0);
-//        ItemStack dupStack = this.inventory.get(1);
-//        if( stack.getItem() == Items.AIR || dupStack.getItem() != Items.AIR )
-//            return;
-//
-//        ItemStack giveStack = stack.copy();
-//
-//        this.updateOutput(new ItemStack(giveStack.getItem()));
-//        reject = true;
-    }
-
-    private void updateOutput(ItemStack stack) {
-        this.inventory.set(1, stack);
     }
 }
