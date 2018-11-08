@@ -1,5 +1,5 @@
 # Duplicator
-Minecraft mod that adds a block to duplicate other blocks (and items) because... well... why not?
+Minecraft mod that adds a block to duplicate other blocks (and items) because... well... why not? :boom: 
 
 ## Hmm?
 ### But really why?
