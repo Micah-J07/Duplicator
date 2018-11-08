@@ -1,17 +1,20 @@
 package com.lumuns.duplicator.common.tileentity;
 
-import com.lumuns.duplicator.common.Duplicator;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -20,11 +23,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TileEntityDuplicator extends TileEntity implements IInventory, ISidedInventory, ITickable {
-    public void activated(World world, BlockPos pos, EntityPlayer player) {
-        player.openGui(Duplicator.instance, 3, world, pos.getX(), pos.getY(), pos.getZ());
-    }
 
+    private NonNullList<ItemStack> inventory = NonNullList.<ItemStack>withSize(2, ItemStack.EMPTY);
+    private String blockName;
 
+    private boolean reject = false;
 
     @Override
     public int[] getSlotsForFace(EnumFacing side) {
@@ -42,24 +45,37 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
     }
 
     @Override
-    public int getSizeInventory() { return 2; }
+    public int getSizeInventory() { return this.inventory.size(); }
 
     @Override
-    public boolean isEmpty() { return false; }
+    public boolean isEmpty() {
+        for(ItemStack stack: this.inventory)
+            if(!stack.isEmpty()) return false;
+
+        return true;
+    }
 
     @Override
     public ItemStack getStackInSlot(int index) {
-        return null;
+        return this.inventory.get(index);
     }
 
     @Override
     public ItemStack decrStackSize(int index, int count) {
-        return null;
+        System.out.println(index);
+        if( index == 1 ) {
+            ItemStack stack = ItemStackHelper.getAndSplit(this.inventory, index, count);
+            ItemStack dupStack = this.inventory.get(0);
+            this.inventory.set(1, new ItemStack(dupStack.getItem(), dupStack.isStackable() ? dupStack.getMaxStackSize() : 1));
+            return stack;
+        }
+
+        return ItemStackHelper.getAndSplit(this.inventory, index, count);
     }
 
     @Override
     public ItemStack removeStackFromSlot(int index) {
-        return null;
+        return ItemStackHelper.getAndRemove(this.inventory, index);
     }
 
     @Override
@@ -67,11 +83,18 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
         if(stack.isEmpty())
             return;
 
+        if( index == 0 ) {
+            this.inventory.set(index, stack);
+
+            ItemStack dupStack = this.inventory.get(0);
+            this.inventory.set(1, new ItemStack(dupStack.getItem(), dupStack.isStackable() ? dupStack.getMaxStackSize() : 1));
+        }
+
         this.markDirty();
     }
 
     @Override
-    public int getInventoryStackLimit() { return 1; }
+    public int getInventoryStackLimit() { return 64; }
 
     @Override
     public boolean isUsableByPlayer(EntityPlayer player) {
@@ -86,7 +109,7 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return true;
+        return index == 0;
     }
 
     @Override
@@ -99,27 +122,44 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
     public int getFieldCount() { return 0; }
 
     @Override
-    public void clear() { }
+    public void clear() {
+        this.inventory.clear();
+    }
 
     @Override
-    public String getName() { return "duplicator"; }
+    public ITextComponent getDisplayName() {
+        return this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName());
+    }
 
     @Override
-    public boolean hasCustomName() { return false; }
+    public String getName() { return this.hasCustomName() ? this.blockName : "duplicator"; }
 
-    private ItemStackHandler itemStackHandler = new ItemStackHandler(1) {
+    public void setName(String name) {
+        this.blockName = name;
+    }
+
+    @Override
+    public boolean hasCustomName() { return this.blockName != null && !this.blockName.isEmpty(); }
+
+    private ItemStackHandler itemStackHandler = new ItemStackHandler(this.inventory.size()) {
 
         @Override
         protected void onContentsChanged(int slot) {
             // We need to tell the tile entity that something has changed so
             // that the chest contents is persisted
-            TileEntityDuplicator.this.markDirty();
+            markDirty();
         }
 
         @Override
         public int getSlotLimit(int slot)
         {
-            return 1;
+            return slot == 1 ? 64 : 1;
+        }
+
+        @Override
+        public boolean isItemValid(int slot, @Nonnull ItemStack stack)
+        {
+            return slot == 0;
         }
 
         @Override
@@ -132,15 +172,22 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (compound.hasKey("items")) {
-            itemStackHandler.deserializeNBT((NBTTagCompound) compound.getTag("items"));
-        }
+
+        this.inventory = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
+        ItemStackHelper.loadAllItems(compound, this.inventory);
+
+        if(compound.hasKey("blockName"))
+            this.setName(compound.getString("blockName"));
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
-        compound.setTag("items", itemStackHandler.serializeNBT());
+
+        ItemStackHelper.saveAllItems(compound, this.inventory);
+        if( this.hasCustomName() )
+            compound.setString("blockName", this.blockName);
+
         return compound;
     }
 
@@ -161,7 +208,27 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
     }
 
     @Override
-    public void update() {
+    public NBTTagCompound getUpdateTag() {
+        return super.getUpdateTag();
+    }
 
+    @Override
+    public void update() {
+//        if( world == null || !world.isRemote || reject )
+//            return;
+//
+//        ItemStack stack = this.inventory.get(0);
+//        ItemStack dupStack = this.inventory.get(1);
+//        if( stack.getItem() == Items.AIR || dupStack.getItem() != Items.AIR )
+//            return;
+//
+//        ItemStack giveStack = stack.copy();
+//
+//        this.updateOutput(new ItemStack(giveStack.getItem()));
+//        reject = true;
+    }
+
+    private void updateOutput(ItemStack stack) {
+        this.inventory.set(1, stack);
     }
 }

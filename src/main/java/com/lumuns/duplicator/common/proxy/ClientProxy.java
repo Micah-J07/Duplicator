@@ -1,29 +1,27 @@
 package com.lumuns.duplicator.common.proxy;
 
-import com.lumuns.duplicator.common.Duplicator;
-import com.lumuns.duplicator.common.blocks.LumunsBlocks;
-import com.lumuns.duplicator.common.network.GuiHandler;
+import com.lumuns.duplicator.common.blocks.ModBlocks;
+import net.minecraft.block.Block;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-public class ClientProxy implements IProxy {
-    @Override
+public class ClientProxy {
+
     public void init(FMLInitializationEvent event) {
-
     }
 
-    @Override
     public void preInit(FMLPreInitializationEvent event) {
-        LumunsBlocks.preInt();
-        LumunsBlocks.registerRender();
-
-        NetworkRegistry.INSTANCE.registerGuiHandler(Duplicator.instance, new GuiHandler());
+        for (Block block: ModBlocks.BLOCKS)
+            ModelLoader.setCustomModelResourceLocation(
+                    Item.getItemFromBlock(block),
+                    0,
+                    new ModelResourceLocation(block.getRegistryName(), "inventory"));
     }
 
-    @Override
     public void postInit(FMLPostInitializationEvent event) {
-
     }
 }
