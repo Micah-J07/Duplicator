@@ -51,8 +51,6 @@ public class DuplicatorContainer extends Container {
             stack = currentStack.copy();
 
             if(index == 1) {
-                System.out.println(2);
-
                 if (!this.mergeItemStack(stack, 2, this.inventorySlots.size(), false)) {
                     return ItemStack.EMPTY;
                 }
