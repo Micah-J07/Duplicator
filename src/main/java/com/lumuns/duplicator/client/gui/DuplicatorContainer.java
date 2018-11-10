@@ -50,19 +50,24 @@ public class DuplicatorContainer extends Container {
             ItemStack currentStack = slot.getStack();
             stack = currentStack.copy();
 
-            if (currentStack.isEmpty())
-            {
-                slot.putStack(ItemStack.EMPTY);
-            }
-            else
-            {
-                slot.onSlotChanged();
-            }
+            if(index == 1) {
+                System.out.println(2);
 
-            if (currentStack.getCount() == stack.getCount())
-            {
+                if (!this.mergeItemStack(stack, 2, this.inventorySlots.size(), false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+            else if (!this.mergeItemStack(currentStack, 1, 2, false)) {
                 return ItemStack.EMPTY;
             }
+
+            if (currentStack.isEmpty())
+                slot.putStack(ItemStack.EMPTY);
+            else
+                slot.onSlotChanged();
+
+            if (currentStack.getCount() == stack.getCount())
+                return ItemStack.EMPTY;
 
             slot.onTake(playerIn, currentStack);
         }
