@@ -28,17 +28,20 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
     @Override
     public int[] getSlotsForFace(EnumFacing side) {
+        if( side == EnumFacing.UP )
+            return new int[] {0};
+
         return new int[] {0, 1};
     }
 
     @Override
     public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
-        return true;
+        return this.isItemValidForSlot(index, itemStackIn);
     }
 
     @Override
     public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-        return true;
+        return false;
     }
 
     @Override
@@ -66,8 +69,10 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
         if( index == 1 ) {
             ItemStack stack = ItemStackHelper.getAndSplit(this.inventory, index, count);
-            ItemStack dupStack = this.inventory.get(0);
-            this.inventory.set(1, new ItemStack(dupStack.getItem(), dupStack.isStackable() ? dupStack.getMaxStackSize() : 1));
+
+            ItemStack dupStack = this.inventory.get(0).copy();
+            dupStack.setCount(dupStack.isStackable() ? dupStack.getMaxStackSize() : 1);
+            this.inventory.set(1, dupStack);
             return stack;
         }
 
@@ -87,8 +92,10 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
         if( index == 0 ) {
             this.inventory.set(index, stack);
 
-            ItemStack dupStack = this.inventory.get(0);
-            this.inventory.set(1, new ItemStack(dupStack.getItem(), dupStack.isStackable() ? dupStack.getMaxStackSize() : 1));
+            ItemStack dupStack = this.inventory.get(0).copy();
+            dupStack.setCount(dupStack.isStackable() ? dupStack.getMaxStackSize() : 1);
+
+            this.inventory.set(1, dupStack);
         }
 
         this.markDirty();
@@ -202,7 +209,7 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
     @Override
     public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+        if (facing != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemStackHandler);
         }
         return super.getCapability(capability, facing);

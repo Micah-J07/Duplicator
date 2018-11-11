@@ -16,7 +16,12 @@ public class DuplicatorContainer extends Container {
     public DuplicatorContainer(InventoryPlayer player, TileEntityDuplicator tileEntity) {
         tileEntityDuplicator = tileEntity;
 
-        this.addSlotToContainer(new Slot(tileEntity, 0, 55, 33));
+        this.addSlotToContainer(new Slot(tileEntity, 0, 55, 33) {
+            @Override
+            public int getSlotStackLimit() {
+                return 1;
+            }
+        });
         this.addSlotToContainer(new Slot(tileEntity, 1, 105, 33));
 
         // Slots for the main inventory
@@ -51,11 +56,11 @@ public class DuplicatorContainer extends Container {
             stack = currentStack.copy();
 
             if(index == 1) {
-                if (!this.mergeItemStack(stack, 2, this.inventorySlots.size(), false)) {
+                if (!this.mergeItemStack(stack, 2, this.inventorySlots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             }
-            else if (!this.mergeItemStack(currentStack, 1, 2, false)) {
+            else if (!this.mergeItemStack(currentStack, 0, 1, false)) {
                 return ItemStack.EMPTY;
             }
 
