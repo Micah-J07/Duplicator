@@ -30,7 +30,7 @@ public class BlockDuplicator extends BlockContainer {
         this.setResistance(0.1f);
         this.setHardness(0.1f);
         this.setRegistryName(Ref.MODID, "duplicator");
-        this.setUnlocalizedName(Ref.MODID +"."+"duplicator");
+        this.setUnlocalizedName(Ref.MODID+".duplicator");
     }
 
     @Override
