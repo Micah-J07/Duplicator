@@ -1,5 +1,6 @@
 package com.lumuns.duplicator.common.tileentity;
 
+import com.lumuns.duplicator.common.Duplicator;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -41,7 +42,8 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
     @Override
     public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-        return false;
+        System.out.println(index);
+        return index == 1;
     }
 
     @Override
@@ -89,15 +91,6 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
         if(stack.isEmpty())
             return;
 
-        if( index == 0 ) {
-            this.inventory.set(index, stack);
-
-            ItemStack dupStack = this.inventory.get(0).copy();
-            dupStack.setCount(dupStack.isStackable() ? dupStack.getMaxStackSize() : 1);
-
-            this.inventory.set(1, dupStack);
-        }
-
         this.markDirty();
     }
 
@@ -117,7 +110,7 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
 
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return index == 0;
+        return index == 0 && this.getItemStackHandler().getStackInSlot(0).isEmpty();
     }
 
     @Override
@@ -149,6 +142,10 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
     @Override
     public boolean hasCustomName() { return this.blockName != null && !this.blockName.isEmpty(); }
 
+    public ItemStackHandler getItemStackHandler() {
+        return itemStackHandler;
+    }
+
     private ItemStackHandler itemStackHandler = new ItemStackHandler(this.inventory.size()) {
 
         @Override
@@ -167,14 +164,42 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
         @Override
         public boolean isItemValid(int slot, @Nonnull ItemStack stack)
         {
-            return slot == 0;
+            System.out.println(stack.toString());
+            return slot == 0 && this.getStackInSlot(0).isEmpty();
         }
 
         @Override
         @Nonnull
         public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            if( slot == 0 ) {
+                ItemStack dupStack = stack.copy();
+                dupStack.setCount(dupStack.isStackable() ? dupStack.getMaxStackSize() : 1);
+
+                this.setStackInSlot(1, dupStack);
+            }
+
             return super.insertItem(slot, stack, simulate);
         }
+
+        @Nonnull
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if( slot == 0 )
+                return ItemStack.EMPTY;
+            
+            if( slot == 1 && amount == this.getStackInSlot(slot).getCount() ) {
+                ItemStack taken = this.getStackInSlot(slot).copy();
+                taken.setCount(64);
+                super.extractItem(slot, amount, simulate);
+
+                this.setStackInSlot(slot, taken);
+                return taken;
+            }
+
+            return super.extractItem(slot, amount, simulate);
+        }
+
+
     };
 
     @Override

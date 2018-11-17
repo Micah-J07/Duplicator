@@ -6,6 +6,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -16,13 +17,13 @@ public class DuplicatorContainer extends Container {
     public DuplicatorContainer(InventoryPlayer player, TileEntityDuplicator tileEntity) {
         tileEntityDuplicator = tileEntity;
 
-        this.addSlotToContainer(new Slot(tileEntity, 0, 55, 33) {
+        this.addSlotToContainer(new SlotItemHandler(tileEntity.getItemStackHandler(), 0, 55, 33) {
             @Override
             public int getSlotStackLimit() {
                 return 1;
             }
         });
-        this.addSlotToContainer(new Slot(tileEntity, 1, 105, 33));
+        this.addSlotToContainer(new SlotItemHandler(tileEntity.getItemStackHandler(), 1, 105, 33));
 
         // Slots for the main inventory
         for (int row = 0; row < 3; ++row) {
