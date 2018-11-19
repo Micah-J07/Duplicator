@@ -184,16 +184,18 @@ public class TileEntityDuplicator extends TileEntity implements IInventory, ISid
         @Nonnull
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if( slot == 0 )
-                return ItemStack.EMPTY;
+//            if( slot == 0 && !simulate)
+//                return ItemStack.EMPTY;
             
-            if( slot == 1 && amount == this.getStackInSlot(slot).getCount() ) {
-                ItemStack taken = this.getStackInSlot(slot).copy();
+            if( slot == 1 ) {
+                ItemStack stack = this.getStackInSlot(slot);
+                ItemStack taken = stack.copy();
                 taken.setCount(64);
+
                 super.extractItem(slot, amount, simulate);
 
                 this.setStackInSlot(slot, taken);
-                return taken;
+                return stack;
             }
 
             return super.extractItem(slot, amount, simulate);
